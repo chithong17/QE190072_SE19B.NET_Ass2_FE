@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
 
 export default function ProjectsManageRedirect() {
-  redirect('/manage/projects');
+  redirect('/admin/projects');
 }

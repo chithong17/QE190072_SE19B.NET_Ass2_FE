@@ -64,27 +64,27 @@ export function Sidebar({ onClose }: SidebarProps) {
   const menuItems = [
     {
       name: 'Dashboard',
-      href: isAuthenticated ? '/manage' : '/',
+      href: isAuthenticated ? '/admin' : '/',
       icon: LayoutDashboard,
-      active: pathname === '/' || pathname === '/manage',
+      active: pathname === '/' || pathname === '/admin',
     },
     {
       name: 'Departments',
-      href: isAuthenticated ? '/manage/departments' : '/departments',
+      href: isAuthenticated ? '/admin/departments' : '/departments',
       icon: Building2,
-      active: pathname.startsWith('/departments') || pathname.startsWith('/manage/departments'),
+      active: pathname.startsWith('/departments') || pathname.startsWith('/admin/departments'),
     },
     {
       name: 'Projects',
-      href: isAuthenticated ? '/manage/projects' : '/projects',
+      href: isAuthenticated ? '/admin/projects' : '/projects',
       icon: FolderKanban,
-      active: (pathname.startsWith('/projects') && !pathname.includes('manage')) || pathname.startsWith('/manage/projects'),
+      active: (pathname.startsWith('/projects') && !pathname.includes('manage')) || pathname.startsWith('/admin/projects'),
     },
     {
       name: 'Tasks',
-      href: isAuthenticated ? '/manage/tasks' : '/tasks',
+      href: isAuthenticated ? '/admin/tasks' : '/tasks',
       icon: CheckSquare,
-      active: pathname.startsWith('/tasks') || pathname.startsWith('/manage/tasks'),
+      active: pathname.startsWith('/tasks') || pathname.startsWith('/admin/tasks'),
     },
     {
       name: 'Search',
@@ -94,9 +94,9 @@ export function Sidebar({ onClose }: SidebarProps) {
     },
     {
       name: 'Tags',
-      href: isAuthenticated ? '/manage/tags' : '/tags',
+      href: isAuthenticated ? '/admin/tags' : '/tags',
       icon: Tags,
-      active: pathname.startsWith('/tags') || pathname.startsWith('/manage/tags'),
+      active: pathname.startsWith('/tags') || pathname.startsWith('/admin/tags'),
     },
   ];
 

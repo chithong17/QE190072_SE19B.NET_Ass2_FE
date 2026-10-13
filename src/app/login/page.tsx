@@ -50,7 +50,7 @@ export default function LoginPage() {
       );
 
       toast.success(`Welcome back, ${fullName}!`);
-      router.push('/manage');
+      router.push('/admin');
     } catch (requestError: unknown) {
       const msg = extractErrorMessage(requestError, 'Invalid email or password. Please try again.');
       setError(msg);

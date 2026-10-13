@@ -272,7 +272,7 @@ export default function Home() {
                   </div>
                 </div>
                 <Link
-                  href="/manage/tasks"
+                  href="/admin/tasks"
                   className="text-sm font-semibold text-blue-600 hover:text-blue-700"
                 >
                   View tasks
