@@ -14,10 +14,11 @@ export interface User {
 export interface AuthContextType {
   user: User | null;
   token: string | null;
+  refreshToken: string | null;
   loading: boolean;
   isAuthenticated: boolean;
   isAdmin: boolean;
-  login: (token: string, userData: User) => void;
+  login: (token: string, userData: User, refreshToken?: string) => void;
   logout: () => void;
   updateUser: (data: Partial<User>) => void;
 }
@@ -25,6 +26,7 @@ export interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
   user: null,
   token: null,
+  refreshToken: null,
   loading: true,
   isAuthenticated: false,
   isAdmin: false,
@@ -36,38 +38,48 @@ const AuthContext = createContext<AuthContextType>({
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
     try {
       const storedToken = localStorage.getItem('token');
+      const storedRefreshToken = localStorage.getItem('refreshToken');
       const storedUser = localStorage.getItem('user');
 
       if (storedToken && storedUser) {
         setToken(storedToken);
+        setRefreshToken(storedRefreshToken);
         setUser(JSON.parse(storedUser));
       }
     } catch (err) {
       console.error('Failed to parse stored authentication session:', err);
       localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const login = (newToken: string, userData: User) => {
+  const login = (newToken: string, userData: User, newRefreshToken?: string) => {
     setToken(newToken);
     setUser(userData);
     localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(userData));
+    if (newRefreshToken) {
+      setRefreshToken(newRefreshToken);
+      localStorage.setItem('refreshToken', newRefreshToken);
+    }
   };
 
   const logout = () => {
     setToken(null);
     setUser(null);
+    setRefreshToken(null);
     localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
     router.push('/');
   };
@@ -87,6 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         token,
+        refreshToken,
         loading,
         isAuthenticated,
         isAdmin,

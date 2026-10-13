@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/axios';
-import { Lock, Mail, ArrowRight, ShieldCheck, UserCheck, AlertCircle, Loader2 } from 'lucide-react';
+import { Lock, Mail, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function LoginPage() {
@@ -34,15 +34,19 @@ export default function LoginPage() {
         password: password.trim(),
       });
 
-      const { token, accountId, fullName, email: userEmail, role, roleName } = res.data;
+      const { token, refreshToken, accountId, fullName, email: userEmail, role, roleName } = res.data;
 
-      login(token, {
-        accountId,
-        fullName,
-        email: userEmail,
-        role,
-        roleName,
-      });
+      login(
+        token,
+        {
+          accountId,
+          fullName,
+          email: userEmail,
+          role,
+          roleName,
+        },
+        refreshToken
+      );
 
       toast.success(`Welcome back, ${fullName}!`);
       router.push('/admin');
@@ -55,16 +59,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleQuickFill = (type: 'admin' | 'staff') => {
-    if (type === 'admin') {
-      setEmail('admin@tasktrack.com');
-      setPassword('AdminPass@123');
-    } else {
-      setEmail('staff@tasktrack.com');
-      setPassword('StaffPass@123');
-    }
-    setError(null);
-  };
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-8">
@@ -143,30 +137,6 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Quick Fill Credentials Helper for Grading */}
-          <div className="mt-6 pt-6 border-t border-gray-100">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 text-center">
-              Quick Test Accounts (For Review)
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => handleQuickFill('admin')}
-                className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border border-gray-200 bg-gray-50/70 hover:bg-gray-100 text-xs font-medium text-gray-700 transition-colors"
-              >
-                <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-                Fill Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickFill('staff')}
-                className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border border-gray-200 bg-gray-50/70 hover:bg-gray-100 text-xs font-medium text-gray-700 transition-colors"
-              >
-                <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
-                Fill Staff
-              </button>
-            </div>
-          </div>
         </div>
 
         {/* Footer Link */}

@@ -120,7 +120,6 @@ export function Sidebar({ onClose }: SidebarProps) {
                 v2
               </span>
             </div>
-            <p className="text-[11px] text-gray-400 truncate">PRN232 Assignment 2</p>
           </div>
         </Link>
         {onClose && (
