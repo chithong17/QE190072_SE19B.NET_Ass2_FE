@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/axios';
 import { Lock, Mail, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { extractErrorMessage } from '@/lib/api-error';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -50,8 +51,8 @@ export default function LoginPage() {
 
       toast.success(`Welcome back, ${fullName}!`);
       router.push('/admin');
-    } catch (err: any) {
-      const msg = err.response?.data?.message || 'Invalid email or password. Please try again.';
+    } catch (requestError: unknown) {
+      const msg = extractErrorMessage(requestError, 'Invalid email or password. Please try again.');
       setError(msg);
       toast.error(msg);
     } finally {
@@ -141,7 +142,7 @@ export default function LoginPage() {
 
         {/* Footer Link */}
         <p className="text-center text-sm text-gray-500 mt-6">
-          Don't have an account yet?{' '}
+          Don&apos;t have an account yet?{' '}
           <Link href="/register" className="font-semibold text-blue-600 hover:text-blue-700 hover:underline">
             Register Staff Account
           </Link>

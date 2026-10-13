@@ -14,7 +14,6 @@ import {
   LogOut,
   LogIn,
   UserPlus,
-  Shield,
   Settings,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
@@ -55,8 +54,8 @@ export function Sidebar({ onClose }: SidebarProps) {
       .catch(console.error);
   }, []);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     toast.success('Signed out successfully.');
     if (onClose) onClose();
   };
@@ -83,7 +82,7 @@ export function Sidebar({ onClose }: SidebarProps) {
     },
     {
       name: 'Tasks',
-      href: '/admin/tasks',
+      href: isAuthenticated ? '/admin/tasks' : '/tasks',
       icon: CheckSquare,
       active: pathname.startsWith('/tasks') || pathname.startsWith('/admin/tasks'),
     },
@@ -95,7 +94,7 @@ export function Sidebar({ onClose }: SidebarProps) {
     },
     {
       name: 'Tags',
-      href: '/admin/tags',
+      href: isAuthenticated ? '/admin/tags' : '/tags',
       icon: Tags,
       active: pathname.startsWith('/tags') || pathname.startsWith('/admin/tags'),
     },

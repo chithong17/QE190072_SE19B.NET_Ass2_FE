@@ -6,6 +6,7 @@ import Link from 'next/link';
 import api from '@/lib/axios';
 import { Lock, Mail, User, ArrowRight, AlertCircle, Loader2, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { extractErrorMessage } from '@/lib/api-error';
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState('');
@@ -57,8 +58,8 @@ export default function RegisterPage() {
       setTimeout(() => {
         router.push('/login');
       }, 1500);
-    } catch (err: any) {
-      const msg = err.response?.data?.message || 'Registration failed. The email may already be in use.';
+    } catch (requestError: unknown) {
+      const msg = extractErrorMessage(requestError, 'Registration failed. The email may already be in use.');
       setError(msg);
       toast.error(msg);
     } finally {

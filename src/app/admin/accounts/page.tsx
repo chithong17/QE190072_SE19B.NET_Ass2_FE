@@ -4,9 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/axios';
 import {
-  Users,
   Shield,
-  ShieldCheck,
   ShieldAlert,
   Trash2,
   Edit2,
@@ -14,11 +12,10 @@ import {
   Loader2,
   RefreshCw,
   Search,
-  CheckCircle,
-  XCircle,
   X,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { extractErrorMessage } from '@/lib/api-error';
 
 interface Account {
   accountId: number;
@@ -50,23 +47,21 @@ export default function AccountsManagementPage() {
     try {
       const res = await api.get('/accounts');
       setAccounts(res.data);
-    } catch (err: any) {
-      if (err.response?.status === 403) {
-        toast.error('Access Denied: Only Admin accounts can access account management.');
-      } else {
-        toast.error(err.response?.data?.message || 'Failed to fetch accounts list.');
-      }
+    } catch (error: unknown) {
+      toast.error(extractErrorMessage(error, 'Failed to fetch accounts list.'));
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (isAdmin) {
-      fetchAccounts();
-    } else {
-      setLoading(false);
-    }
+    if (!isAdmin) return;
+    let active = true;
+    api.get('/accounts')
+      .then((response) => active && setAccounts(response.data))
+      .catch((error: unknown) => active && toast.error(extractErrorMessage(error, 'Failed to fetch accounts list.')))
+      .finally(() => active && setLoading(false));
+    return () => { active = false; };
   }, [isAdmin]);
 
   // Non-admin Access Denied View
@@ -115,8 +110,8 @@ export default function AccountsManagementPage() {
       toast.success(`Updated account #${editingAccount.accountId} successfully.`);
       setEditingAccount(null);
       fetchAccounts();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to update account.');
+    } catch (error: unknown) {
+      toast.error(extractErrorMessage(error, 'Failed to update account.'));
     } finally {
       setSaving(false);
     }
@@ -131,9 +126,8 @@ export default function AccountsManagementPage() {
       toast.success(`Account ${deletingAccount.email} deleted successfully.`);
       setDeletingAccount(null);
       fetchAccounts();
-    } catch (err: any) {
-      const msg = err.response?.data?.message || 'Failed to delete account.';
-      toast.error(msg);
+    } catch (error: unknown) {
+      toast.error(extractErrorMessage(error, 'Failed to delete account.'));
     } finally {
       setDeleting(false);
     }

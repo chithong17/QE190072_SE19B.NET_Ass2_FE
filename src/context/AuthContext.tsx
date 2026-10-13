@@ -2,112 +2,128 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import api, { AUTH_SESSION_EVENT } from '@/lib/axios';
 
 export interface User {
   accountId: number;
   fullName: string;
   email: string;
-  role: number; // 0 = Staff, 1 = Admin
+  role: number;
   roleName: string;
 }
 
-export interface AuthContextType {
-  user: User | null;
+interface StoredSession {
   token: string | null;
   refreshToken: string | null;
+  user: User | null;
+}
+
+export interface AuthContextType extends StoredSession {
   loading: boolean;
   isAuthenticated: boolean;
   isAdmin: boolean;
   login: (token: string, userData: User, refreshToken?: string) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   updateUser: (data: Partial<User>) => void;
 }
 
+const emptySession: StoredSession = { token: null, refreshToken: null, user: null };
+
 const AuthContext = createContext<AuthContextType>({
-  user: null,
-  token: null,
-  refreshToken: null,
+  ...emptySession,
   loading: true,
   isAuthenticated: false,
   isAdmin: false,
-  login: () => {},
-  logout: () => {},
-  updateUser: () => {},
+  login: () => undefined,
+  logout: async () => undefined,
+  updateUser: () => undefined,
 });
 
+function clearStoredSession() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('user');
+}
+
+function readStoredSession(): StoredSession {
+  const token = localStorage.getItem('token');
+  const refreshToken = localStorage.getItem('refreshToken');
+  const storedUser = localStorage.getItem('user');
+  if (!token || !storedUser) return emptySession;
+  return { token, refreshToken, user: JSON.parse(storedUser) as User };
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [refreshToken, setRefreshToken] = useState<string | null>(null);
+  const [session, setSession] = useState<StoredSession>(emptySession);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    try {
-      const storedToken = localStorage.getItem('token');
-      const storedRefreshToken = localStorage.getItem('refreshToken');
-      const storedUser = localStorage.getItem('user');
+    const syncSession = () => {
+      Promise.resolve().then(() => {
+        try {
+          setSession(readStoredSession());
+        } catch (error) {
+          console.error('Failed to restore the authentication session:', error);
+          clearStoredSession();
+          setSession(emptySession);
+        } finally {
+          setLoading(false);
+        }
+      });
+    };
+    const expireSession = () => {
+      syncSession();
+      router.push('/login?expired=1');
+    };
 
-      if (storedToken && storedUser) {
-        setToken(storedToken);
-        setRefreshToken(storedRefreshToken);
-        setUser(JSON.parse(storedUser));
-      }
-    } catch (err) {
-      console.error('Failed to parse stored authentication session:', err);
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('user');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    syncSession();
+    window.addEventListener(AUTH_SESSION_EVENT, syncSession);
+    window.addEventListener('auth-session-expired', expireSession);
+    return () => {
+      window.removeEventListener(AUTH_SESSION_EVENT, syncSession);
+      window.removeEventListener('auth-session-expired', expireSession);
+    };
+  }, [router]);
 
   const login = (newToken: string, userData: User, newRefreshToken?: string) => {
-    setToken(newToken);
-    setUser(userData);
+    const next = { token: newToken, user: userData, refreshToken: newRefreshToken ?? null };
+    setSession(next);
     localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(userData));
-    if (newRefreshToken) {
-      setRefreshToken(newRefreshToken);
-      localStorage.setItem('refreshToken', newRefreshToken);
-    }
+    if (newRefreshToken) localStorage.setItem('refreshToken', newRefreshToken);
+    else localStorage.removeItem('refreshToken');
   };
 
-  const logout = () => {
-    setToken(null);
-    setUser(null);
-    setRefreshToken(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
-    router.push('/');
+  const logout = async () => {
+    try {
+      if (session.refreshToken) await api.post('/auth/revoke');
+    } catch {
+      // Local logout still succeeds if the server is unavailable.
+    } finally {
+      clearStoredSession();
+      setSession(emptySession);
+      router.push('/');
+    }
   };
 
   const updateUser = (data: Partial<User>) => {
-    if (!user) return;
-    const updated = { ...user, ...data };
-    setUser(updated);
-    localStorage.setItem('user', JSON.stringify(updated));
+    if (!session.user) return;
+    const user = { ...session.user, ...data };
+    setSession({ ...session, user });
+    localStorage.setItem('user', JSON.stringify(user));
   };
 
-  const isAuthenticated = !!token && !!user;
-  const isAdmin = user?.role === 1;
-
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        token,
-        refreshToken,
-        loading,
-        isAuthenticated,
-        isAdmin,
-        login,
-        logout,
-        updateUser,
-      }}
-    >
+    <AuthContext.Provider value={{
+      ...session,
+      loading,
+      isAuthenticated: Boolean(session.token && session.user),
+      isAdmin: session.user?.role === 1,
+      login,
+      logout,
+      updateUser,
+    }}>
       {children}
     </AuthContext.Provider>
   );
@@ -115,8 +131,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 }

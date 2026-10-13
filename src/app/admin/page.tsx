@@ -15,7 +15,6 @@ import {
   PlusCircle,
   Activity,
   Layers,
-  Sparkles,
 } from 'lucide-react';
 
 interface DashboardStats {
@@ -52,7 +51,7 @@ export default function AdminDashboardPage() {
           try {
             const accRes = await api.get('/accounts');
             accCount = accRes.data.length;
-          } catch (e) {
+          } catch {
             // Not admin or error
           }
         }

@@ -27,3 +27,6 @@ jobs:
       env:
         NEXT_PUBLIC_API_URL: https://dummy-api.onrender.com/api
       run: npm run build
+
+    - name: Lint source
+      run: npm run lint
