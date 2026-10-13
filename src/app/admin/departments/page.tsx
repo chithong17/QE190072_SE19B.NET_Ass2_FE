@@ -478,7 +478,7 @@ export default function DepartmentsPage() {
                               <div className="py-6 text-center text-sm text-slate-500">
                                 <p>No projects assigned to this department yet.</p>
                                 <Link
-                                  href="/projects/manage"
+                                  href="/admin/projects"
                                   className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline"
                                 >
                                   + Create project in Projects Management

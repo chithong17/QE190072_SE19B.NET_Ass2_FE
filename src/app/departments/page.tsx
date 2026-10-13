@@ -109,7 +109,7 @@ export default function PublicDepartments() {
         </div>
 
         <Link
-          href="/departments/manage"
+          href="/admin/departments"
           className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-200 hover:text-blue-600"
         >
           Manage departments <ArrowRight className="h-3.5 w-3.5" />

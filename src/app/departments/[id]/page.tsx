@@ -111,7 +111,7 @@ export default function DepartmentDetailPage() {
     } catch (err) {
       console.error('Failed to load department details:', err);
       toast.error('Department not found or failed to load');
-      router.push('/departments/manage');
+      router.push('/departments');
     } finally {
       setLoading(false);
     }
@@ -204,7 +204,7 @@ export default function DepartmentDetailPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2 text-sm text-slate-500">
           <Link
-            href="/departments/manage"
+            href="/departments"
             className="inline-flex items-center gap-1.5 font-medium text-slate-600 hover:text-blue-600 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -218,12 +218,12 @@ export default function DepartmentDetailPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => router.push('/departments/manage')}
+            onClick={() => router.push('/admin/departments')}
             className="border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
           >
             Manage Departments
           </Button>
-          <Link href="/projects/manage">
+          <Link href="/admin/projects">
             <Button size="sm" className="bg-blue-600 font-semibold text-white shadow-sm hover:bg-blue-700">
               <FolderKanban className="mr-1.5 h-4 w-4" />
               Add Project
@@ -361,7 +361,7 @@ export default function DepartmentDetailPage() {
                 Clear Search
               </Button>
             ) : (
-              <Link href="/projects/manage" className="mt-4">
+              <Link href="/admin/projects" className="mt-4">
                 <Button size="sm" className="bg-blue-600 text-white">
                   <FolderKanban className="mr-1.5 h-4 w-4" />
                   Create Project
