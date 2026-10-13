@@ -70,13 +70,13 @@ export function Sidebar({ onClose }: SidebarProps) {
     },
     {
       name: 'Departments',
-      href: isAuthenticated ? '/admin/departments' : '/departments',
+      href: '/departments',
       icon: Building2,
       active: pathname.startsWith('/departments') || pathname.startsWith('/admin/departments'),
     },
     {
       name: 'Projects',
-      href: isAuthenticated ? '/admin/projects' : '/projects',
+      href: '/projects',
       icon: FolderKanban,
       active: (pathname.startsWith('/projects') && !pathname.includes('manage')) || pathname.startsWith('/admin/projects'),
     },
